@@ -1,0 +1,37 @@
+version: '3.9'
+
+volumes:
+  dev_postgres_data: {}
+  data:
+
+services:
+  db:
+    container_name: support_db
+    image: postgres
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=support
+    expose:
+      - '5433' # Publishes 5433 to other containers but NOT to host machine
+    ports:
+      - '5433:5433'
+    command: -p 5433
+
+  backend:
+    container_name: support_backend
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    image: support/backend
+    command: ./start.sh
+    volumes:
+      - .:/code
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
