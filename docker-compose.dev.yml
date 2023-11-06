@@ -1,0 +1,32 @@
+version: '3.9'
+
+volumes:
+  dev_postgres_data: {}
+
+services:
+  db:
+    container_name: support-db
+    image: postgres
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=support_system
+    ports:
+      - '5433:5432'
+
+  backend:
+    container_name: support-backend
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    command: /code/start.sh
+    volumes:
+      - .:/code
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
